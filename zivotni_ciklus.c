@@ -21,9 +21,10 @@ enum Food {
 };
 
 pthread_mutex_t lock; 
-int REMAINING_FOOD = 30;
+int REMAINING_FOOD = 5;
 const int FOOD_COUNT = 5;
 enum Food foodOnTable[5];
+
 int generateRandom(int lower, int upper) {
     return (rand() % (upper - lower + 1)) + lower;
 }
@@ -66,8 +67,8 @@ void carServiceActivity(const char *name){
     }
 }
 
-void printMealsByName(const char *name, int numberOfTimesAccessedTable, int numberOfTimeEaten) {
-    printf("%s has eaten %d times and has been left hungry %d times.\n", name, numberOfTimeEaten, numberOfTimesAccessedTable - numberOfTimeEaten);
+void printMealsByName(const char *name, int numberOfTimesAccessedTable, int numberOfTimeEaten, int numberOfTimeNotEatenDueToDislike) {
+    printf("%s has eaten %d times, didn't like the food %d times, and has been left hungry %d times.\n", name, numberOfTimeEaten, numberOfTimeNotEatenDueToDislike, numberOfTimesAccessedTable - numberOfTimeEaten - numberOfTimeNotEatenDueToDislike);
 }
 
 void baseActivity(){
@@ -111,13 +112,21 @@ void *tinPipeline(void *arg)
     const char *name = "Tin";
     int numberOfTimesAccessedTable = 0;
     int numberOfTimeEaten = 0;
+    int numberOfTimeNotEatenDueToDislike = 0;
+    int eatResult;
     while (1)
     {
         sleepActivity(name);
         programmingActivity(name);
         numberOfTimesAccessedTable++;
-        pthread_mutex_lock(&lock); 
-        numberOfTimeEaten += eatActivity(name);
+        pthread_mutex_lock(&lock);
+        eatResult = eatActivity(name);
+        numberOfTimeEaten += (eatResult >= 0) ? eatResult : 0;
+        if (eatResult == -1)
+        {
+            numberOfTimeNotEatenDueToDislike++;
+        }
+        
         pthread_mutex_unlock(&lock); 
         carServiceActivity(name);
         if (REMAINING_FOOD <= 0 && isTableEmpty() == 1)
@@ -125,7 +134,8 @@ void *tinPipeline(void *arg)
             break;
         }
     }
-    printMealsByName(name, numberOfTimesAccessedTable, numberOfTimeEaten);
+    printf("TIMES ACCESSED: %d, TIMES EATEN %d, TIMES DISLIKED %d, TIMES EMPTY TABLE: %d\n", numberOfTimesAccessedTable, numberOfTimeEaten, numberOfTimeNotEatenDueToDislike, numberOfTimesAccessedTable - numberOfTimeEaten - numberOfTimeNotEatenDueToDislike);
+    // printMealsByName(name, numberOfTimesAccessedTable, numberOfTimeEaten, numberOfTimeNotEatenDueToDislike);
     pthread_exit(NULL);
 }
 void *davorPipeline(void *arg)
@@ -133,13 +143,21 @@ void *davorPipeline(void *arg)
     const char *name = "Davor";
     int numberOfTimesAccessedTable = 0;
     int numberOfTimeEaten = 0;
+    int numberOfTimeNotEatenDueToDislike = 0;
+    int eatResult;
     while (1)
     {
         sleepActivity(name);
         programmingActivity(name);
         numberOfTimesAccessedTable++;
         pthread_mutex_lock(&lock); 
-        numberOfTimeEaten += eatActivity(name);
+        eatResult = eatActivity(name);
+        numberOfTimeEaten += (eatResult >= 0) ? eatResult : 0;
+        if (eatResult == -1)
+        {
+            numberOfTimeNotEatenDueToDislike++;
+        }
+        
         pthread_mutex_unlock(&lock); 
         watchTVActivity(name);
         if (REMAINING_FOOD <= 0 && isTableEmpty() == 1)
@@ -147,7 +165,8 @@ void *davorPipeline(void *arg)
             break;
         }
     }
-    printMealsByName(name, numberOfTimesAccessedTable, numberOfTimeEaten);
+    printf("TIMES ACCESSED: %d, TIMES EATEN %d, TIMES DISLIKED %d, TIMES EMPTY TABLE: %d\n", numberOfTimesAccessedTable, numberOfTimeEaten, numberOfTimeNotEatenDueToDislike, numberOfTimesAccessedTable - numberOfTimeEaten - numberOfTimeNotEatenDueToDislike);
+    // printMealsByName(name, numberOfTimesAccessedTable, numberOfTimeEaten, numberOfTimeNotEatenDueToDislike);
     pthread_exit(NULL);
 }
 void *ivicaPipeline(void *arg)
@@ -155,13 +174,21 @@ void *ivicaPipeline(void *arg)
     const char *name = "Ivica";
     int numberOfTimesAccessedTable = 0;
     int numberOfTimeEaten = 0;
+    int numberOfTimeNotEatenDueToDislike = 0;
+    int eatResult;
     while (1)
     {
         sleepActivity(name);
         tenisActivity(name);
         numberOfTimesAccessedTable++;
         pthread_mutex_lock(&lock); 
-        numberOfTimeEaten += eatActivity(name);
+                eatResult = eatActivity(name);
+        numberOfTimeEaten += (eatResult >= 0) ? eatResult : 0;
+        if (eatResult == -1)
+        {
+            numberOfTimeNotEatenDueToDislike++;
+        }
+        
         pthread_mutex_unlock(&lock); 
         programmingActivity(name);
         if (REMAINING_FOOD <= 0 && isTableEmpty() == 1)
@@ -169,7 +196,9 @@ void *ivicaPipeline(void *arg)
             break;
         }
     }
-    printMealsByName(name, numberOfTimesAccessedTable, numberOfTimeEaten);
+    printf("TIMES ACCESSED: %d, TIMES EATEN %d, TIMES DISLIKED %d, TIMES EMPTY TABLE: %d\n", numberOfTimesAccessedTable, numberOfTimeEaten, numberOfTimeNotEatenDueToDislike, numberOfTimesAccessedTable - numberOfTimeEaten - numberOfTimeNotEatenDueToDislike);
+
+    // printMealsByName(name, numberOfTimesAccessedTable, numberOfTimeEaten, numberOfTimeNotEatenDueToDislike);
     pthread_exit(NULL);
 }
 void *ivanPipeline(void *arg)
@@ -177,13 +206,21 @@ void *ivanPipeline(void *arg)
     const char *name = "Ivan";
     int numberOfTimesAccessedTable = 0;
     int numberOfTimeEaten = 0;
+    int numberOfTimeNotEatenDueToDislike = 0;
+    int eatResult;
     while (1)
     {
         sleepActivity(name);
         listenToPianoActivity(name);
         numberOfTimesAccessedTable++;
         pthread_mutex_lock(&lock); 
-        numberOfTimeEaten += eatActivity(name);
+                eatResult = eatActivity(name);
+        numberOfTimeEaten += (eatResult >= 0) ? eatResult : 0;
+        if (eatResult == -1)
+        {
+            numberOfTimeNotEatenDueToDislike++;
+        }
+        
         pthread_mutex_unlock(&lock); 
         programmingActivity(name); 
         if (REMAINING_FOOD <= 0 && isTableEmpty() == 1)
@@ -191,7 +228,9 @@ void *ivanPipeline(void *arg)
             break;
         }
     }
-    printMealsByName(name, numberOfTimesAccessedTable, numberOfTimeEaten);
+    printf("TIMES ACCESSED: %d, TIMES EATEN %d, TIMES DISLIKED %d, TIMES EMPTY TABLE: %d\n", numberOfTimesAccessedTable, numberOfTimeEaten, numberOfTimeNotEatenDueToDislike, numberOfTimesAccessedTable - numberOfTimeEaten - numberOfTimeNotEatenDueToDislike);
+
+    // printMealsByName(name, numberOfTimesAccessedTable, numberOfTimeEaten, numberOfTimeNotEatenDueToDislike);
     pthread_exit(NULL);
 }
 
@@ -201,7 +240,9 @@ void *kuharicaPipeline(void *arg)
     while (1)
     {
         cookActivity(name);
+        pthread_mutex_lock(&lock);
         placeFoodOnTableActivity(name);
+        pthread_mutex_unlock(&lock); 
         restActivity(name);
         if (REMAINING_FOOD <= 0 && isTableEmpty() == 1)
         {
@@ -238,6 +279,9 @@ void placeFoodOnTableActivity(const char *name){
 }
 
 int eatActivity(const char *name){
+    // return -1 for didnt like food
+    // return 0 for table empty
+    // return 1 for ate
     // Tin vegetarijansko - 0,3,4,5,6,7
     // Davor neslatko - 1,2,4,6,7
     // Ivica necuspajs - 0,1,2,3,5,6,7
@@ -303,7 +347,8 @@ int eatActivity(const char *name){
             }
         }
     }
-    return 0;
+    printf("%s SE NE SVIDA HRANA\n", name);
+    return -1;
 }
 
 int main() {
@@ -311,6 +356,7 @@ int main() {
         printf("\n mutex init has failed\n"); 
         return 1; 
     }
+    srand(time(NULL));
     for (size_t i = 0; i < FOOD_COUNT; i++)
     {
         // initial zapis kako bi kuharica mogla spremit
